@@ -10,6 +10,8 @@
   const pvProgress = document.querySelector(".pv-progress span");
   const pvToggleButton = document.querySelector("[data-pv-toggle]");
   const pvReplayButton = document.querySelector("[data-pv-replay]");
+  const pvEnd = document.querySelector("[data-pv-end]");
+  const pvEndReplayButton = document.querySelector("[data-pv-replay-end]");
   const caseIndexItems = Array.from(document.querySelectorAll("[data-case-index]"));
   const legacyDemoPlayer = document.querySelector("[data-demo-player]");
   const legacyDemoSteps = Array.from(document.querySelectorAll(".demo-step"));
@@ -24,7 +26,7 @@
   const revealTargets = Array.from(document.querySelectorAll(".paper-still, .demo-window, .pv-window, .message-photo, .about-mark, .logo-band, .photo-window, .day-card figure"));
   const heroRotators = Array.from(document.querySelectorAll("[data-hero-rotator]"));
   const PV_HAS_SOUND = true;
-  const PV_FALLBACK_DURATION = 45;
+  const PV_FALLBACK_DURATION = 42.4;
   const legacyCaptions = [
     "01 運行を話す/打つ",
     "02 入った項目を確かめる",
@@ -198,10 +200,11 @@
     });
   }
 
+  // PV v8(2026-10-09)の幕に合わせる:話すだけ〜実演(7.1〜19.4秒)/一発で・整う(19.4〜26.5秒)/月末の夜〜届く。(26.5〜33.5秒)
   function getPvActiveStep(time) {
-    if (time >= 18.5 && time < 28.6) return 1;
-    if ((time >= 28.6 && time < 29.8) || (time >= 32.6 && time < 34.2)) return 2;
-    if (time >= 29.8 && time < 31.0) return 3;
+    if (time >= 7.1 && time < 19.4) return 1;
+    if (time >= 19.4 && time < 26.5) return 2;
+    if (time >= 26.5 && time < 33.5) return 3;
     return 0;
   }
 
@@ -282,7 +285,13 @@
       window.cancelAnimationFrame(pvFrameId);
       if (pvToggleButton) pvToggleButton.textContent = "再生";
       updatePvProgress();
+      // 見終わったら、そのまま実物のデモへ進めるようにする
+      if (pvEnd) pvEnd.hidden = false;
     });
+    pvVideo.addEventListener("play", () => {
+      if (pvEnd) pvEnd.hidden = true;
+    });
+    pvEndReplayButton?.addEventListener("click", replayPv);
 
     if (PV_HAS_SOUND && pvToggleButton?.parentElement) {
       const soundButton = document.createElement("button");
